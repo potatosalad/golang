@@ -87,7 +87,7 @@ func (f *File) DiscardCgoDirectives() {
 // _cgo_flags file for the build system to use.
 func (p *Package) addToFlag(flag string, args []string) {
 	p.CgoFlags[flag] = append(p.CgoFlags[flag], args...)
-	if flag == "CFLAGS" {
+	if flag == "CFLAGS" || flag == "CPPFLAGS" {
 		// We'll also need these when preprocessing for dwarf information.
 		p.GccOptions = append(p.GccOptions, args...)
 	}

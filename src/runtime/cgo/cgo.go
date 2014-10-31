@@ -21,6 +21,7 @@ package cgo
 #cgo windows LDFLAGS: -lm -mthreads
 
 #cgo CFLAGS: -Wall -Werror
+#cgo solaris CPPFLAGS: -D_POSIX_PTHREAD_SEMANTICS
 
 */
 import "C"

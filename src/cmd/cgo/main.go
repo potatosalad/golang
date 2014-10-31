@@ -222,6 +222,22 @@ func main() {
 		p.addToFlag("LDFLAGS", args)
 	}
 
+	if cflags := os.Getenv("CGO_CFLAGS"); cflags != "" {
+		args, err := splitQuoted(cflags)
+		if err != nil {
+			fatalf("bad CGO_CFLAGS: %q (%s)", cflags, err)
+		}
+		p.addToFlag("CFLAGS", args);
+	}
+
+	if cppflags := os.Getenv("CGO_CPPFLAGS"); cppflags != "" {
+		args, err := splitQuoted(cppflags)
+		if err != nil {
+			fatalf("bad CGO_CPPFLAGS: %q (%s)", cppflags, err)
+		}
+		p.addToFlag("CPPFLAGS", args);
+	}
+
 	// Need a unique prefix for the global C symbols that
 	// we use to coordinate between gcc and ourselves.
 	// We already put _cgo_ at the beginning, so the main

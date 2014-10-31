@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin dragonfly freebsd !android,linux netbsd openbsd solaris
+// +build darwin dragonfly freebsd !android,linux netbsd openbsd
 // +build cgo
 
 package user
@@ -17,6 +17,8 @@ import (
 )
 
 /*
+#cgo CPPFLAGS: -D_POSIX_PTHREAD_SEMANTICS
+#cgo CFLAGS: -D_POSIX_PTHREAD_SEMANTICS
 #include <unistd.h>
 #include <sys/types.h>
 #include <pwd.h>
