@@ -965,6 +965,46 @@ dodata(void)
 	datap = listsort(datap, datcmp, offsetof(LSym, next));
 
 	/*
+	 * The SunOS rtld expects the .rel/.rela and .rel.plt/.rela.plt
+	 * sections to be contiguous.  More properly, it expects that the
+	 * region starting from the lower of DT_RELA and DT_PLTREL and
+	 * continuing for DT_RELASZ bytes contains at least the set of non-PLT
+	 * relocation entries.  To ensure this, we put .rel[a].plt after .rel[a].
+	 * This is actually required by the ELF gABI on all ELF platforms.
+	 */
+	if (ctxt->headtype == Hsolaris) {
+		for (l = &datap; (s = *l) != nil; ) {
+			if (strcmp(s->name, ".rel.plt") == 0 ||
+			    strcmp(s->name, ".rela.plt") == 0) {
+				*l = s->next;
+				s->next = nil;
+				last = s;
+				break;
+			}
+			l = &s->next;
+		}
+
+		if (s != nil) {
+			for (s = datap; s != nil; s = s->next) {
+				if (strcmp(s->name, ".rel") == 0 ||
+				    strcmp(s->name, ".rela") == 0) {
+					last->next = s->next;
+					s->next = last;
+					break;
+				}
+			}
+			/*
+			 * .rel[a].plt without .rel[a].  Should never occur
+			 * but just in case, put it back where we found it.
+			 */
+			if (s == nil) {
+				last->next = (*l)->next;
+				(*l)->next = last;
+			}
+		}
+	}
+
+	/*
 	 * allocate sections.  list is sorted by type,
 	 * so we can just walk it for each piece we want to emit.
 	 * segdata is processed before segtext, because we need
