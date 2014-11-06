@@ -14,6 +14,7 @@ package cgosotest
 #cgo netbsd LDFLAGS: -L. libcgosotest.so
 #cgo darwin LDFLAGS: -L. libcgosotest.dylib
 #cgo windows LDFLAGS: -L. libcgosotest.dll
+#cgo solaris LDFLAGS: -L. -lcgosotest
 
 void init(void);
 void sofunc(void);

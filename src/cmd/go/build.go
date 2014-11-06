@@ -2322,6 +2322,10 @@ func (b *builder) cgo(p *Package, cgoExe, obj string, pcCFLAGS, pcLDFLAGS, gccfi
 	if pie { // we need to use -pie for Linux/ARM to get accurate imported sym
 		cgoLDFLAGS = append(cgoLDFLAGS, "-pie")
 	}
+	lgcc_s := goos == "solaris"
+	if lgcc_s {
+		cgoLDFLAGS = append(cgoLDFLAGS, "-lgcc_s");
+	}
 	if err := b.gccld(p, dynobj, cgoLDFLAGS, linkobj); err != nil {
 		return nil, nil, err
 	}
