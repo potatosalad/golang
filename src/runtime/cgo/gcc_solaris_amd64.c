@@ -5,6 +5,7 @@
 #include <pthread.h>
 #include <string.h>
 #include <signal.h>
+#include <ucontext.h>
 #include "libcgo.h"
 
 static void* threadentry(void*);
@@ -13,15 +14,13 @@ static void (*setg_gcc)(void*);
 void
 x_cgo_init(G *g, void (*setg)(void*))
 {
-	pthread_attr_t attr;
-	size_t size;
+	ucontext_t ctx;
 
 	setg_gcc = setg;
-	pthread_attr_init(&attr);
-	if (pthread_attr_getstack(&attr, (void **)&g->stacklo, &size) != 0)
-		perror("runtime/cgo: pthread_attr_getstack failed");
-	g->stackhi = (uintptr_t)g->stacklo + 8192;
-	pthread_attr_destroy(&attr);
+	if (getcontext(&ctx) != 0)
+		perror("runtime/cgo: getcontext failed");
+	g->stacklo = (uintptr_t)ctx.uc_stack.ss_sp;
+	g->stackhi = g->stacklo + 8192;
 }
 
 void
@@ -30,6 +29,7 @@ _cgo_sys_thread_start(ThreadStart *ts)
 	pthread_attr_t attr;
 	sigset_t ign, oset;
 	pthread_t p;
+	void *base;
 	size_t size;
 	int err;
 
@@ -38,9 +38,9 @@ _cgo_sys_thread_start(ThreadStart *ts)
 
 	pthread_attr_init(&attr);
 
-	if (pthread_attr_getstack(&attr, (void **)&ts->g->stacklo, &size) != 0)
+	if (pthread_attr_getstack(&attr, &base, &size) != 0)
 		perror("runtime/cgo: pthread_attr_getstack failed");
-	ts->g->stackhi = (uintptr_t)ts->g->stacklo + 8192;
+	ts->g->stackhi = size;
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 	err = pthread_create(&p, &attr, threadentry, ts);
 
