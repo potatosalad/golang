@@ -151,6 +151,12 @@ main(int argc, char *argv[])
 	if(headstring == nil)
 		headstring = headstr(HEADTYPE);
 
+	if (HEADTYPE == Hsolaris && debug['d'] != 0) {
+		fprint(2, "%cl: -d is not supported with this target\n",
+		    thechar);
+		exits("usage");
+	}
+
 	archinit();
 	ctxt->debugfloat = debug['F'];
 

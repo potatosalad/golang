@@ -30,7 +30,7 @@ Options new in this version:
 		Elide the dynamic linking header.  With this option, the binary
 		is statically linked and does not refer to a dynamic linker.  Without this option
 		(the default), the binary's contents are identical but it is loaded with a dynamic
-		linker. This flag cannot be used when $GOOS is windows.
+		linker. This flag cannot be used when $GOOS is windows or solaris
 	-H darwin     (only in 6l/8l)
 		Write Apple Mach-O binaries (default when $GOOS is darwin)
 	-H dragonfly  (only in 6l/8l)
