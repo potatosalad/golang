@@ -40,7 +40,13 @@ _cgo_sys_thread_start(ThreadStart *ts)
 
 	if (pthread_attr_getstack(&attr, &base, &size) != 0)
 		perror("runtime/cgo: pthread_attr_getstack failed");
-	ts->g->stackhi = size;
+	if (size == 0) {
+		ts->g->stackhi = 2 << 20;
+		if (pthread_attr_setstack(&attr, NULL, ts->g->stackhi) != 0)
+			perror("runtime/cgo: pthread_attr_setstack failed");
+	} else {
+		ts->g->stackhi = size;
+	}
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 	err = pthread_create(&p, &attr, threadentry, ts);
 
