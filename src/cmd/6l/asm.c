@@ -209,12 +209,23 @@ adddynrel(LSym *s, Reloc *r)
 	
 	case R_ADDR:
 		if(s->type == STEXT && iself) {
-			// The code is asking for the address of an external
-			// function.  We provide it with the address of the
-			// correspondent GOT symbol.
-			addgotsym(targ);
-			r->sym = linklookup(ctxt, ".got", 0);
-			r->add += targ->got;
+			/*
+			 * On SunOS, all external references are dynamic.
+			 * Emit a PLT relocation at this site.
+			 */
+			if (HEADTYPE == Hsolaris) {
+				addpltsym(targ);
+				r->sym = linklookup(ctxt, ".plt", 0);
+				r->add = targ->plt;
+			} else {
+				// The code is asking for the address of an
+				// external function.  We provide it with the
+				// address of the correspondent GOT symbol.
+				addgotsym(targ);
+				r->sym = linklookup(ctxt, ".got", 0);
+				r->add += targ->got;
+			}
+
 			return;
 		}
 		if(s->type != SDATA)
