@@ -508,27 +508,8 @@ adddynsym(Link *ctxt, LSym *s)
 		adduint8(ctxt, d, t);
 		adduint8(ctxt, d, 0);
 	
-		/* shndx */
-		if(s->type == SDYNIMPORT)
-			adduint16(ctxt, d, SHN_UNDEF);
-		else {
-			switch(s->type) {
-			default:
-			case STEXT:
-				t = 11;
-				break;
-			case SRODATA:
-				t = 12;
-				break;
-			case SDATA:
-				t = 13;
-				break;
-			case SBSS:
-				t = 14;
-				break;
-			}
-			adduint16(ctxt, d, t);
-		}
+		/* shndx; see dodynsym(). */
+		adduint16(ctxt, d, SHN_UNDEF);
 	} else if(HEADTYPE == Hdarwin) {
 		diag("adddynsym: missed symbol %s (%s)", s->name, s->extname);
 	} else if(HEADTYPE == Hwindows) {

@@ -550,28 +550,9 @@ adddynsym(Link *ctxt, LSym *s)
 	
 		/* reserved */
 		adduint8(ctxt, d, 0);
-	
-		/* section where symbol is defined */
-		if(s->type == SDYNIMPORT)
-			adduint16(ctxt, d, SHN_UNDEF);
-		else {
-			switch(s->type) {
-			default:
-			case STEXT:
-				t = 11;
-				break;
-			case SRODATA:
-				t = 12;
-				break;
-			case SDATA:
-				t = 13;
-				break;
-			case SBSS:
-				t = 14;
-				break;
-			}
-			adduint16(ctxt, d, t);
-		}
+
+		/* section where symbol is defined; see dodynsym(). */
+		adduint16(ctxt, d, SHN_UNDEF);
 	
 		/* value */
 		if(s->type == SDYNIMPORT)

@@ -194,6 +194,7 @@ main(int argc, char *argv[])
 	pclntab();
 	symtab();
 	dodata();
+	dodynsym();
 	address();
 	doweak();
 	reloc();

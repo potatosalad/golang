@@ -1279,6 +1279,85 @@ dodata(void)
 		sect->extnum = n++;
 }
 
+/*
+ * Fix up the section numbers in .dynsym if present.  We could not write these
+ * shndx entries until we know all present sections and have sorted them.
+ *
+ * Each dynsym entry is actually an ElfXX_Sym, and we're going to replace the
+ * st_shndx field.  For 32-bit targets, that's at offset 0xe; for 64-bit, it's
+ * at offset 0x6.  Anything we don't expect, we ignore and leave unchanged.
+ */
+void
+dodynsym(void)
+{
+	LSym *ds;
+	LSym *ss;
+	LSym *s;
+	vlong off;
+	size_t entsz;
+	uint16 ent;
+	char *sectname = nil;
+
+	if (!iself)
+		return;
+
+	ds = linklookup(ctxt, ".dynsym", 0);
+
+	if (ds == nil)
+		return;
+
+	if (thechar == '6')
+		entsz = ELF64SYMSIZE;
+	else
+		entsz = ELF32SYMSIZE;
+
+	for(s = ctxt->allsym; s != nil; s = s->allsym) {
+		if (s->dynid <= 0 || s->type == SDYNIMPORT)
+			continue;
+
+		if (s->sect != nil) {
+			ent = s->sect->extnum;
+		} else {
+			switch (s->type) {
+			case STEXT:
+			default:
+				sectname = ".text";
+				break;
+			case SRODATA:
+				sectname = ".rodata";
+				break;
+			case SDATA:
+				sectname = ".data";
+				break;
+			case SBSS:
+				sectname = ".bss";
+				break;
+			}
+
+			ss = linklookup(ctxt, sectname, 0);
+			if (ss == nil || ss->sect == nil) {
+				diag("dodynsym: symbol %s in nonexistent %s",
+				    s->extname != nil ? s->extname : "<none>",
+				    sectname);
+				continue;
+			}
+
+			ent = ss->sect->extnum;
+		}
+
+		if (ent == 0) {
+			diag("dodynsym: symbol %s in section 0; ignored");
+			continue;
+		}
+
+		off = s->dynid * entsz +
+		    ((thechar == '6') ? offsetof(Elf64_Sym, shndx) :
+		    offsetof(Elf32_Sym, shndx));
+
+		(void) setuint16(ctxt, ds, off, ent);
+	}
+}
+
 // assign addresses to text
 void
 textaddress(void)

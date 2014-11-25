@@ -216,6 +216,7 @@ char*	decodetype_structfieldname(LSym *s, int i);
 vlong	decodetype_structfieldoffs(LSym *s, int i);
 LSym*	decodetype_structfieldtype(LSym *s, int i);
 void	dodata(void);
+void	dodynsym(void);
 void	dostkcheck(void);
 void	dostkoff(void);
 void	dosymtype(void);
