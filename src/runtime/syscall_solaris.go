@@ -9,12 +9,10 @@ import "unsafe"
 var (
 	libc_chdir,
 	libc_chroot,
-	libc_close,
 	libc_dlopen,
 	libc_dlclose,
 	libc_dlsym,
 	libc_execve,
-	libc_exit,
 	libc_fcntl,
 	libc_forkx,
 	libc_gethostname,
@@ -27,7 +25,6 @@ var (
 	libc_setpgid,
 	libc_syscall,
 	libc_wait4,
-	libc_write,
 	pipe1 libcFunc
 )
 
@@ -38,9 +35,9 @@ func syscall_sysvicall6(fn, nargs, a1, a2, a3, a4, a5, a6 uintptr) (r1, r2, err 
 		n:    nargs,
 		args: uintptr(unsafe.Pointer(&a1)),
 	}
-	entersyscallblock()
+	entersyscallblock(0)
 	asmcgocall(unsafe.Pointer(&asmsysvicall6), unsafe.Pointer(&call))
-	exitsyscall()
+	exitsyscall(0)
 	return call.r1, call.r2, call.err
 }
 
@@ -93,9 +90,9 @@ func syscall_dlopen(name *byte, mode uintptr) (handle uintptr, err uintptr) {
 		n:    2,
 		args: uintptr(unsafe.Pointer(&name)),
 	}
-	entersyscallblock()
+	entersyscallblock(0)
 	asmcgocall(unsafe.Pointer(&asmsysvicall6), unsafe.Pointer(&call))
-	exitsyscall()
+	exitsyscall(0)
 	if call.r1 == 0 {
 		return call.r1, call.err
 	}
@@ -108,9 +105,9 @@ func syscall_dlclose(handle uintptr) (err uintptr) {
 		n:    1,
 		args: uintptr(unsafe.Pointer(&handle)),
 	}
-	entersyscallblock()
+	entersyscallblock(0)
 	asmcgocall(unsafe.Pointer(&asmsysvicall6), unsafe.Pointer(&call))
-	exitsyscall()
+	exitsyscall(0)
 	return call.r1
 }
 
@@ -120,9 +117,9 @@ func syscall_dlsym(handle uintptr, name *byte) (proc uintptr, err uintptr) {
 		n:    2,
 		args: uintptr(unsafe.Pointer(&handle)),
 	}
-	entersyscallblock()
+	entersyscallblock(0)
 	asmcgocall(unsafe.Pointer(&asmsysvicall6), unsafe.Pointer(&call))
-	exitsyscall()
+	exitsyscall(0)
 	if call.r1 == 0 {
 		return call.r1, call.err
 	}
@@ -176,9 +173,9 @@ func syscall_gethostname() (name string, err uintptr) {
 		n:    2,
 		args: uintptr(unsafe.Pointer(&args[0])),
 	}
-	entersyscallblock()
+	entersyscallblock(0)
 	asmcgocall(unsafe.Pointer(&asmsysvicall6), unsafe.Pointer(&call))
-	exitsyscall()
+	exitsyscall(0)
 	if call.r1 != 0 {
 		return "", call.err
 	}
@@ -203,9 +200,9 @@ func syscall_pipe() (r, w, err uintptr) {
 		n:    0,
 		args: uintptr(unsafe.Pointer(&pipe1)), // it's unused but must be non-nil, otherwise crashes
 	}
-	entersyscallblock()
+	entersyscallblock(0)
 	asmcgocall(unsafe.Pointer(&asmsysvicall6), unsafe.Pointer(&call))
-	exitsyscall()
+	exitsyscall(0)
 	return call.r1, call.r2, call.err
 }
 
@@ -292,9 +289,9 @@ func syscall_syscall(trap, a1, a2, a3 uintptr) (r1, r2, err uintptr) {
 		n:    4,
 		args: uintptr(unsafe.Pointer(&trap)),
 	}
-	entersyscallblock()
+	entersyscallblock(0)
 	asmcgocall(unsafe.Pointer(&asmsysvicall6), unsafe.Pointer(&call))
-	exitsyscall()
+	exitsyscall(0)
 	return call.r1, call.r2, call.err
 }
 
@@ -304,9 +301,9 @@ func syscall_wait4(pid uintptr, wstatus *uint32, options uintptr, rusage unsafe.
 		n:    4,
 		args: uintptr(unsafe.Pointer(&pid)),
 	}
-	entersyscallblock()
+	entersyscallblock(0)
 	asmcgocall(unsafe.Pointer(&asmsysvicall6), unsafe.Pointer(&call))
-	exitsyscall()
+	exitsyscall(0)
 	return int(call.r1), call.err
 }
 
